@@ -2,6 +2,9 @@
 ###If needed install packages before running (use commented code below):
 ###install.packages(c("tidyverse","caret","randomForest","pROC","ggplot2","gridExtra","Boruta","ranger"))
 
+##Update: The disease classification should read "Subclinical vs hospitalized" rather than "Subclinical vs severe",
+##since "severe" is now known as "hospitalized".
+
 library(tidyverse)
 library(caret)
 library(randomForest)
@@ -835,3 +838,4 @@ cat("Optimal hyperparameters:\n")
 print(best_params)
 cat("Final LOPO-CV AUC:", round(lopo_auc, 4), "\n")
 cat("Features reduced from", ncol(X_train), "to", ncol(X_train_final), "\n")
+
