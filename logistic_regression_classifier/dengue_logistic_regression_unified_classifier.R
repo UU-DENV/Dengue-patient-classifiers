@@ -404,11 +404,11 @@ check_leakage_and_split <- function(df_wide, classification_type) {
     filter(n_classes > 1)
   
   if(nrow(class_check) > 0) {
-    cat("⚠️ WARNING: Some patients have inconsistent class labels!\n")
+    cat("WARNING: Some patients have inconsistent class labels!\n")
     print(class_check)
     cat("\n")
   } else {
-    cat("✓ All patients have consistent class labels\n\n")
+    cat("All patients have consistent class labels\n\n")
   }
   
   # Patient-level stratified train/test split
@@ -439,10 +439,10 @@ check_leakage_and_split <- function(df_wide, classification_type) {
     stop("ERROR: Patients found in both train and test sets!")
   }
   
-  cat("✓ Train/test split complete\n")
-  cat("  Split ratio: 75/25 (75% train, 25% test)\n")
-  cat("  Training set:", length(train_patients), "patients,", nrow(train_data), "observations\n")
-  cat("  Test set:", length(test_patients), "patients,", nrow(test_data), "observations\n\n")
+  cat("Train/test split complete\n")
+  cat("Split ratio: 75/25 (75% train, 25% test)\n")
+  cat("Training set:", length(train_patients), "patients,", nrow(train_data), "observations\n")
+  cat("Test set:", length(test_patients), "patients,", nrow(test_data), "observations\n\n")
   
   return(list(
     train_data = train_data,
@@ -492,7 +492,7 @@ preprocess_data <- function(train_data, test_data, exclude_cols) {
     }
   }
   
-  cat("✓ Imputation complete\n\n")
+  cat("Imputation complete\n\n")
   
   return(list(
     X_train = X_train,
@@ -579,9 +579,9 @@ perform_feature_selection <- function(X_train, X_test, y_train, classification_t
     }
     # Warn if we're using too many features for the sample size
     if(max_features_rf > n_samples / 5) {
-      cat("  ⚠️  WARNING: Using ", max_features_rf, " features with ", n_samples, 
-          " samples (ratio = ", round(n_samples / max_features_rf, 2), ":1)\n")
-      cat("    Recommended ratio is at least 10:1 for reliable logistic regression\n")
+      cat("WARNING: Using ", max_features_rf, " features with ", n_samples, 
+          "samples (ratio = ", round(n_samples / max_features_rf, 2), ":1)\n")
+      cat("Recommended ratio is at least 10:1 for reliable logistic regression\n")
     }
     if(ncol(X_train_cor) > 1 && max_features_rf > 0) {
       rf_data <- data.frame(y = y_train, X_train_cor)
@@ -599,8 +599,8 @@ perform_feature_selection <- function(X_train, X_test, y_train, classification_t
   
   # Warn if we have very few features
   if(ncol(X_train_final) < 3) {
-    cat("⚠️  WARNING: Very few features selected (", ncol(X_train_final), 
-        "). Model may have limited predictive power.\n")
+    cat("WARNING: Very few features selected (", ncol(X_train_final), 
+        ").Model may have limited predictive power.\n")
   }
   
   # Univariate AUC filtering - skip for panel so we keep all panel features
@@ -653,7 +653,7 @@ perform_feature_selection <- function(X_train, X_test, y_train, classification_t
     }
   }
   
-  cat("✓ Final feature count:", ncol(X_train_final), "\n\n")
+  cat("Final feature count:", ncol(X_train_final), "\n\n")
   
   # Store fixed feature set for LOPO-CV
   fixed_feature_set <- colnames(X_train_final)
@@ -760,7 +760,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
     weights_vec <- class_weights[y_train_char]
     # Validate length
     if(length(weights_vec) != length(y_train)) {
-      cat("  ⚠️  WARNING: Weights length mismatch. Recalculating weights...\n")
+      cat("WARNING: Weights length mismatch. Recalculating weights...\n")
       # Recalculate weights based on current y_train distribution
       train_tbl <- table(y_train)
       if(diff(range(train_tbl)) > 0) {
@@ -772,7 +772,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
     }
     # Check for NA values in weights
     if(any(is.na(weights_vec))) {
-      cat("  ⚠️  WARNING: NA values in weights. Replacing with 1.0...\n")
+      cat("WARNING: NA values in weights. Replacing with 1.0...\n")
       weights_vec[is.na(weights_vec)] <- 1.0
     }
     weights_vec
@@ -782,8 +782,8 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
   
   # Validate weights length one more time before use
   if(!is.null(obs_weights) && length(obs_weights) != nrow(X_train_scaled)) {
-    cat("  ⚠️  WARNING: Final weights length (", length(obs_weights), 
-        ") != data rows (", nrow(X_train_scaled), "). Using equal weights.\n")
+    cat("WARNING: Final weights length (", length(obs_weights), 
+        ")!= data rows (", nrow(X_train_scaled), "). Using equal weights.\n")
     obs_weights <- NULL
   }
   
@@ -848,7 +848,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
         
         # CRITICAL: Ensure foldid length matches X_train_scaled exactly
         if(length(foldid) != nrow(X_train_scaled)) {
-          cat("  ⚠️  WARNING: foldid length (", length(foldid), 
+          cat("WARNING: foldid length (", length(foldid), 
               ") != data rows (", nrow(X_train_scaled), "). Using standard CV.\n")
           use_foldid <- FALSE
           foldid <- NULL
@@ -856,7 +856,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
           # Validate fold assignments
           fold_counts <- table(foldid)
           if(any(fold_counts == 0)) {
-            cat("  ⚠️  WARNING: Some CV folds are empty. Using standard CV.\n")
+            cat("WARNING: Some CV folds are empty. Using standard CV.\n")
             use_foldid <- FALSE
             foldid <- NULL
             fold_counts <- NULL
@@ -867,7 +867,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
               fold_indices <- which(foldid == f)
               fold_classes <- unique(y_train[fold_indices])
               if(length(fold_classes) < 2) {
-                cat("  ⚠️  WARNING: Fold", f, "has only one class. Using standard CV.\n")
+                cat("WARNING: Fold", f, "has only one class. Using standard CV.\n")
                 fold_class_ok <- FALSE
                 break
               }
@@ -883,11 +883,11 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
           }
         }
       } else {
-        cat("  ⚠️  WARNING: Not enough unique patients for patient-grouped CV. Using standard CV.\n")
+        cat("WARNING: Not enough unique patients for patient-grouped CV. Using standard CV.\n")
         use_foldid <- FALSE
       }
     } else {
-      cat("  ⚠️  WARNING: Not enough unique patients for patient-grouped CV. Using standard CV.\n")
+      cat("WARNING: Not enough unique patients for patient-grouped CV. Using standard CV.\n")
       use_foldid <- FALSE
     }
   } else {
@@ -896,9 +896,9 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
   }
   
   if(use_foldid && !is.null(foldid)) {
-    cat("  Using patient-grouped CV with", n_folds, "folds\n")
+    cat("Using patient-grouped CV with", n_folds, "folds\n")
   } else {
-    cat("  Using standard CV (no foldid) with", n_folds, "folds\n")
+    cat("Using standard CV (no foldid) with", n_folds, "folds\n")
     foldid <- NULL
     # Create fold_counts for standard CV
     if(!is.null(foldid)) {
@@ -919,13 +919,13 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
     use_auc <- min_fold_size >= 10
     type_measure <- if(use_auc) "auc" else "deviance"
     if(!use_auc) {
-      cat("  ⚠️  WARNING: Folds too small (min =", min_fold_size, 
+      cat("WARNING: Folds too small (min =", min_fold_size, 
           ") for AUC. Using deviance instead.\n")
     }
   } else {
     # Default to deviance if we can't determine fold size
     type_measure <- "deviance"
-    cat("  ⚠️  WARNING: Cannot determine fold sizes. Using deviance.\n")
+    cat("WARNING: Cannot determine fold sizes. Using deviance.\n")
   }
   
   # Storage for results
@@ -936,23 +936,23 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
     result <- tryCatch({
       # Validate inputs before calling cv.glmnet
       if(any(is.na(X_train_scaled)) || any(is.infinite(X_train_scaled))) {
-        cat("  ⚠️  Alpha =", alpha_val, "| X_train_scaled contains NA or Inf values (skipping)\n")
+        cat("Alpha =", alpha_val, "| X_train_scaled contains NA or Inf values (skipping)\n")
         return(NULL)
       }
       
       if(any(is.na(y_train))) {
-        cat("  ⚠️  Alpha =", alpha_val, "| y_train contains NA values (skipping)\n")
+        cat("Alpha =", alpha_val, "| y_train contains NA values (skipping)\n")
         return(NULL)
       }
       
       if(length(unique(y_train)) < 2) {
-        cat("  ⚠️  Alpha =", alpha_val, "| y_train has less than 2 classes (skipping)\n")
+        cat("Alpha =", alpha_val, "| y_train has less than 2 classes (skipping)\n")
         return(NULL)
       }
       
       # Validate weights length one final time
       if(!is.null(obs_weights) && length(obs_weights) != nrow(X_train_scaled)) {
-        cat("  ⚠️  Alpha =", alpha_val, "| Weights length mismatch, using NULL weights\n")
+        cat("Alpha =", alpha_val, "| Weights length mismatch, using NULL weights\n")
         obs_weights_use <- NULL
       } else {
         obs_weights_use <- obs_weights
@@ -985,19 +985,19 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
       cv_model <- tryCatch({
         do.call(cv.glmnet, cv_args)
       }, error = function(e) {
-        cat("  ⚠️  Alpha =", alpha_val, "| cv.glmnet failed:", e$message, "\n")
+        cat("Alpha =", alpha_val, "| cv.glmnet failed:", e$message, "\n")
         # Try without weights if weights caused the error
         if(!is.null(obs_weights_use) && grepl("length", e$message, ignore.case = TRUE)) {
-          cat("    Retrying without weights...\n")
+          cat("Retrying without weights...\n")
           cv_args_no_weights <- cv_args
           cv_args_no_weights$weights <- NULL
           return(tryCatch({
             do.call(cv.glmnet, cv_args_no_weights)
           }, error = function(e2) {
-            cat("    Retry also failed:", e2$message, "\n")
+            cat("Retry also failed:", e2$message, "\n")
             # Last resort: try without foldid and without weights
             if(use_foldid && !is.null(foldid)) {
-              cat("    Retrying without foldid and without weights...\n")
+              cat("Retrying without foldid and without weights...\n")
               cv_args_simple <- list(
                 x = X_train_scaled,
                 y = y_train,
@@ -1011,7 +1011,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
               return(tryCatch({
                 do.call(cv.glmnet, cv_args_simple)
               }, error = function(e3) {
-                cat("    Final retry also failed:", e3$message, "\n")
+                cat("Final retry also failed:", e3$message, "\n")
                 return(NULL)
               }))
             }
@@ -1035,7 +1035,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
         }, error = function(e) FALSE)
         
         if(!cvm_valid) {
-          cat("  ⚠️  Alpha =", alpha_val, "| No valid CV metrics (skipping)\n")
+          cat("Alpha =", alpha_val, "| No valid CV metrics (skipping)\n")
           return(NULL)
         }
         
@@ -1047,7 +1047,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
         
         # Skip if CV AUC is invalid
         if(length(patient_cv_auc) != 1 || is.na(patient_cv_auc) || is.infinite(patient_cv_auc)) {
-          cat("  ⚠️  Alpha =", alpha_val, "| Invalid CV-AUC (skipping)\n")
+          cat("Alpha =", alpha_val, "| Invalid CV-AUC (skipping)\n")
           return(NULL)
         }
       } else {
@@ -1106,7 +1106,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
         as.numeric(predict(cv_model, newx = X_train_scaled, 
                            s = "lambda.min", type = "response"))
       }, error = function(e) {
-        cat("  ⚠️  Alpha =", alpha_val, "| Error predicting with lambda.min:", e$message, "\n")
+        cat("Alpha =", alpha_val, "| Error predicting with lambda.min:", e$message, "\n")
         return(NULL)
       })
       
@@ -1116,7 +1116,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
       }, error = function(e) FALSE)
       
       if(!preds_min_valid) {
-        cat("  ⚠️  Alpha =", alpha_val, "| Invalid predictions with lambda.min (skipping)\n")
+        cat("Alpha =", alpha_val, "| Invalid predictions with lambda.min (skipping)\n")
         return(NULL)
       }
       
@@ -1136,7 +1136,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
         as.numeric(predict(cv_model, newx = X_train_scaled, 
                           s = "lambda.1se", type = "response"))
       }, error = function(e) {
-        cat("  ⚠️  Alpha =", alpha_val, "| Error predicting with lambda.1se:", e$message, "\n")
+        cat("Alpha =", alpha_val, "| Error predicting with lambda.1se:", e$message, "\n")
         return(NULL)
       })
       
@@ -1146,7 +1146,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
       }, error = function(e) FALSE)
       
       if(!preds_1se_valid) {
-        cat("  ⚠️  Alpha =", alpha_val, "| Invalid predictions with lambda.1se (skipping)\n")
+        cat("Alpha =", alpha_val, "| Invalid predictions with lambda.1se (skipping)\n")
         return(NULL)
       }
       
@@ -1189,7 +1189,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
       }, error = function(e) TRUE)
       
       if(both_invalid) {
-        cat("  ⚠️  Alpha =", alpha_val, "| Both lambda.min and lambda.1se failed (skipping)\n")
+        cat("Alpha =", alpha_val, "| Both lambda.min and lambda.1se failed (skipping)\n")
         return(NULL)
       }
       
@@ -1223,14 +1223,14 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
         train_auc_used <- train_auc_min
         gap_used <- gap_min
         lambda_value <- cv_model$lambda.min
-        cat("  ⚠️  Alpha =", alpha_val, "| lambda.1se is invalid, using lambda.min\n")
+        cat("Alpha =", alpha_val, "| lambda.1se is invalid, using lambda.min\n")
       } else if(train_auc_1se_low) {
         # lambda.1se is broken (essentially random)
         lambda_type <- "lambda.min"
         train_auc_used <- train_auc_min
         gap_used <- gap_min
         lambda_value <- cv_model$lambda.min
-        cat("  ⚠️  Alpha =", alpha_val, "| lambda.1se broken (AUC =", 
+        cat("Alpha =", alpha_val, "| lambda.1se broken (AUC =", 
             round(train_auc_1se, 3), "), using lambda.min\n")
       } else {
         # Use lambda.1se (more conservative, prevents overfitting)
@@ -1256,7 +1256,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
       )
       
     }, error = function(e) {
-      cat("  Error with alpha =", alpha_val, ":", e$message, "\n")
+      cat("Error with alpha =", alpha_val, ":", e$message, "\n")
       return(NULL)
     })
     
@@ -1275,7 +1275,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
         gap_1se = result$gap_1se
       ))
       
-      cat("  Alpha =", result$alpha, 
+      cat("Alpha =", result$alpha, 
           "| CV-AUC =", round(result$patient_cv_auc, 3),
           "| Train-AUC =", round(result$train_auc, 3),
           "| Gap =", round(result$train_cv_gap, 3),
@@ -1301,7 +1301,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
   cat("Models with train AUC > 0.55:", nrow(viable_models), "/", nrow(alpha_results), "\n")
   
   if(nrow(viable_models) == 0) {
-    cat("⚠️  No viable models found! Using best CV-AUC available...\n")
+    cat("No viable models found! Using best CV-AUC available...\n")
     # Remove rows with NA values before selecting
     alpha_results_clean <- alpha_results[!is.na(alpha_results$patient_cv_auc), ]
     if(nrow(alpha_results_clean) == 0) {
@@ -1315,7 +1315,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
     cat("Models with CV-AUC >= 0.60:", nrow(good_cv_models), "/", nrow(viable_models), "\n")
     
     if(nrow(good_cv_models) == 0) {
-      cat("⚠️  No models with CV-AUC >= 0.60. Relaxing to CV-AUC >= 0.55...\n")
+      cat("No models with CV-AUC >= 0.60. Relaxing to CV-AUC >= 0.55...\n")
       good_cv_models <- viable_models[viable_models$patient_cv_auc >= 0.55, ]
     }
     
@@ -1328,16 +1328,16 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
       if(nrow(small_gap_models) > 0) {
         # Step 4: Among small-gap models, pick highest CV-AUC
         best_params <- small_gap_models[which.max(small_gap_models$patient_cv_auc), ]
-        cat("✓ Selected model with best CV-AUC among low-gap models\n")
+        cat("Selected model with best CV-AUC among low-gap models\n")
       } else {
         # If all gaps are large, pick model with smallest gap
         best_params <- good_cv_models[which.min(good_cv_models$train_cv_gap), ]
-        cat("⚠️  All gaps > 0.20. Selected model with smallest gap\n")
+        cat("All gaps > 0.20. Selected model with smallest gap\n")
       }
     } else {
       # Fallback: pick best CV-AUC
       best_params <- viable_models[which.max(viable_models$patient_cv_auc), ]
-      cat("⚠️  Fallback: Selected model with best CV-AUC\n")
+      cat("Fallback: Selected model with best CV-AUC\n")
     }
   }
   
@@ -1345,10 +1345,10 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
   if(!is.null(best_params$lambda_type) && best_params$lambda_type == "lambda.min") {
     # Check if lambda.1se is reasonable for this alpha
     if(!is.null(best_params$train_auc_1se) && !is.na(best_params$train_auc_1se) && best_params$train_auc_1se > 0.55) {
-      cat("\n🔒 FORCING lambda.1se to prevent overfitting\n")
-      cat("   Original: lambda.min (train AUC =", round(best_params$train_auc_min, 3), 
+      cat("\nFORCING lambda.1se to prevent overfitting\n")
+      cat("Original: lambda.min (train AUC =", round(best_params$train_auc_min, 3), 
           ", gap =", round(best_params$gap_min, 3), ")\n")
-      cat("   Forced:   lambda.1se (train AUC =", round(best_params$train_auc_1se, 3), 
+      cat("Forced:   lambda.1se (train AUC =", round(best_params$train_auc_1se, 3), 
           ", gap =", round(best_params$gap_1se, 3), ")\n")
       
       # Update to use lambda.1se
@@ -1359,28 +1359,28 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
     }
   }
   
-  cat("\n✓ OPTIMAL PARAMETERS SELECTED:\n")
-  cat("  Alpha:", best_params$alpha, "\n")
-  cat("  Lambda type:", best_params$lambda_type, "\n")
-  cat("  Patient CV-AUC:", round(best_params$patient_cv_auc, 3), "\n")
-  cat("  Train AUC:", round(best_params$train_auc, 3), "\n")
-  cat("  Train-CV gap:", round(best_params$train_cv_gap, 3), "\n")
+  cat("\nOPTIMAL PARAMETERS SELECTED:\n")
+  cat("Alpha:", best_params$alpha, "\n")
+  cat("Lambda type:", best_params$lambda_type, "\n")
+  cat("Patient CV-AUC:", round(best_params$patient_cv_auc, 3), "\n")
+  cat("Train AUC:", round(best_params$train_auc, 3), "\n")
+  cat("Train-CV gap:", round(best_params$train_cv_gap, 3), "\n")
   
   # Warnings
   if(best_params$patient_cv_auc < 0.65) {
-    cat("\n⚠️  WARNING: Low CV-AUC (", round(best_params$patient_cv_auc, 3), ")\n")
-    cat("   Consider: More data, better features, or different algorithm\n")
+    cat("\nWARNING: Low CV-AUC (", round(best_params$patient_cv_auc, 3), ")\n")
+    cat("Consider: More data, better features, or different algorithm\n")
   }
   
   if(best_params$train_cv_gap > 0.20) {
-    cat("\n⚠️  WARNING: Large train-CV gap (", round(best_params$train_cv_gap, 3), ")\n")
-    cat("   Model may still be overfitting. Consider stronger regularization.\n")
+    cat("\nWARNING: Large train-CV gap (", round(best_params$train_cv_gap, 3), ")\n")
+    cat("Model may still be overfitting. Consider stronger regularization.\n")
   }
   
   if(best_params$train_auc > 0.85) {
-    cat("\n⚠️  WARNING: Very high train AUC (", round(best_params$train_auc, 3), ")\n")
-    cat("   This suggests overfitting despite regularization.\n")
-    cat("   Recommendation: Reduce features or increase regularization further.\n")
+    cat("\nWARNING: Very high train AUC (", round(best_params$train_auc, 3), ")\n")
+    cat("This suggests overfitting despite regularization.\n")
+    cat("Recommendation: Reduce features or increase regularization further.\n")
   }
   
   cat("\n")
@@ -1483,23 +1483,23 @@ train_final_model <- function(X_train_scaled, y_train, best_params, class_weight
     train_auc_min <- auc(train_roc_min)
     
     if(train_auc_min > train_auc_1se + 0.10) {
-      cat("  ⚠️  lambda.1se broken (train AUC =", round(train_auc_1se, 3), 
+      cat("lambda.1se broken (train AUC =", round(train_auc_1se, 3), 
           "), using lambda.min (train AUC =", round(train_auc_min, 3), ")\n")
       cv_model_final$lambda_to_use <- "lambda.min"
     } else {
-      cat("  ⚠️  Both lambdas have low train AUC. Using lambda.1se (more conservative)\n")
+      cat("Both lambdas have low train AUC. Using lambda.1se (more conservative)\n")
       cv_model_final$lambda_to_use <- "lambda.1se"
     }
   } else {
     # lambda.1se is working - ALWAYS use it
     cv_model_final$lambda_to_use <- "lambda.1se"
-    cat("  ✓ Using lambda.1se (train AUC =", round(train_auc_1se, 3), ")\n")
+    cat("Using lambda.1se (train AUC =", round(train_auc_1se, 3), ")\n")
   }
   
-  cat("\n✓ Final model trained\n")
-  cat("  Lambda.1se:", round(cv_model_final$lambda.1se, 6), "\n")
-  cat("  Lambda.min:", round(cv_model_final$lambda.min, 6), "\n")
-  cat("  Using:", cv_model_final$lambda_to_use, "\n")
+  cat("\nFinal model trained\n")
+  cat("Lambda.1se:", round(cv_model_final$lambda.1se, 6), "\n")
+  cat("Lambda.min:", round(cv_model_final$lambda.min, 6), "\n")
+  cat("Using:", cv_model_final$lambda_to_use, "\n")
   cat("\n")
   
   return(cv_model_final)
@@ -1584,7 +1584,7 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
     test_patient <- unique_patients[i]
     
     if(i %% 5 == 0) {
-      cat("  Processed", i, "/", n_patients, "patients\n")
+      cat("Processed", i, "/", n_patients, "patients\n")
     }
     
     tryCatch({
@@ -1712,18 +1712,18 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
         lopo_roc <- roc(all_labels, all_preds, quiet = TRUE)
       }
       lopo_auc <- auc(lopo_roc)
-      cat("✓ LOPO-CV complete\n")
-      cat("  Successful folds:", lopo_fold_counter, "/", n_patients, "\n")
-      cat("  LOPO-CV AUC:", round(lopo_auc, 4), "\n\n")
+      cat("LOPO-CV complete\n")
+      cat("Successful folds:", lopo_fold_counter, "/", n_patients, "\n")
+      cat("LOPO-CV AUC:", round(lopo_auc, 4), "\n\n")
     } else {
       lopo_roc <- NULL
       lopo_auc <- NA
-      cat("⚠️ LOPO-CV failed: Insufficient class diversity\n\n")
+      cat("LOPO-CV failed: Insufficient class diversity\n\n")
     }
   } else {
     lopo_roc <- NULL
     lopo_auc <- NA
-    cat("⚠️ LOPO-CV failed: No successful predictions\n\n")
+    cat("LOPO-CV failed: No successful predictions\n\n")
   }
   
   return(list(
@@ -1783,9 +1783,9 @@ extract_feature_importance <- function(cv_model_final, feature_names = NULL) {
   cat("Features with non-zero coefficients:", sum(importance_df$Coefficient != 0), "\n")
   
   if(nrow(importance_df) < 15) {
-    cat("⚠️  WARNING: Only", nrow(importance_df), "features available (requested 15).\n")
-    cat("   This is because feature selection reduced the feature set.\n")
-    cat("   Showing all available features.\n")
+    cat("WARNING: Only", nrow(importance_df), "features available (requested 15).\n")
+    cat("This is because feature selection reduced the feature set.\n")
+    cat("Showing all available features.\n")
   }
   
   cat("Top 15 features (by absolute coefficient):\n")
@@ -1877,7 +1877,7 @@ create_feature_importance_plot <- function(importance_df, classification_type, o
     ggsave(gsub("\\.png$", ".emf", base_filename), plot = p, width = 20, height = 16, units = "in"),
     error = function(e) message("EMF export skipped: ", conditionMessage(e))
   )
-  cat("✓ Feature importance plot saved\n\n")
+  cat("Feature importance plot saved\n\n")
   
   return(p)
 }
@@ -2321,7 +2321,7 @@ split_result <- check_leakage_and_split(df_wide, CLASSIFICATION_TYPE)
 train_data <- split_result$train_data
 test_data <- split_result$test_data
 if(length(split_result$test_patients) < 10) {
-  cat("⚠️  WARNING: Small test set (", length(split_result$test_patients), " patients). Test AUC may be unstable; LOPO-CV is a more reliable estimate.\n\n")
+  cat("WARNING: Small test set (", length(split_result$test_patients), " patients). Test AUC may be unstable; LOPO-CV is a more reliable estimate.\n\n")
 }
 
 # Step 3: Preprocess
@@ -2363,53 +2363,53 @@ cat("===========================================================================
 cat("DIAGNOSTIC SUMMARY\n")
 cat("============================================================================\n")
 cat("\n1. FEATURE COUNT:\n")
-cat("   Final number of features used:", ncol(X_train_final), "\n")
-cat("   Sample-to-feature ratio:", round(nrow(X_train_scaled) / ncol(X_train_final), 2), ":1\n")
+cat("Final number of features used:", ncol(X_train_final), "\n")
+cat("Sample-to-feature ratio:", round(nrow(X_train_scaled) / ncol(X_train_final), 2), ":1\n")
 if(nrow(X_train_scaled) / ncol(X_train_final) < 10) {
-  cat("   ⚠️  WARNING: Ratio < 10:1 - may lead to overfitting\n")
+  cat("WARNING: Ratio < 10:1 - may lead to overfitting\n")
 }
 cat("\n2. CLASS DISTRIBUTION:\n")
-cat("   Overall (all patients):\n")
+cat("Overall (all patients):\n")
 patient_classes_all <- df_wide %>%
   group_by(patient_id) %>%
   summarise(class = first(class)) %>%
   ungroup()
 print(table(patient_classes_all$class))
-cat("\n   Training set (patients):\n")
+cat("\nTraining set (patients):\n")
 train_patient_classes <- train_data %>%
   group_by(patient_id) %>%
   summarise(class = first(class)) %>%
   ungroup()
 print(table(train_patient_classes$class))
-cat("\n   Test set (patients):\n")
+cat("\nTest set (patients):\n")
 test_patient_classes <- test_data %>%
   group_by(patient_id) %>%
   summarise(class = first(class)) %>%
   ungroup()
 print(table(test_patient_classes$class))
-cat("\n3. TRAIN/TEST SPLIT:\n")
-cat("   Split ratio: 75/25 (75% train, 25% test)\n")
-cat("   Training patients:", length(unique(train_data$patient_id)), "\n")
-cat("   Test patients:", length(unique(test_data$patient_id)), "\n")
-cat("   Training observations:", nrow(train_data), "\n")
-cat("   Test observations:", nrow(test_data), "\n")
+cat("\n3.TRAIN/TEST SPLIT:\n")
+cat("Split ratio: 75/25 (75% train, 25% test)\n")
+cat("Training patients:", length(unique(train_data$patient_id)), "\n")
+cat("Test patients:", length(unique(test_data$patient_id)), "\n")
+cat("Training observations:", nrow(train_data), "\n")
+cat("Test observations:", nrow(test_data), "\n")
 cat("\n4. ELASTIC NET PARAMETERS:\n")
-cat("   Alpha (regularization mix):", best_params$alpha, "\n")
-cat("     (0 = Ridge, 1 = Lasso, 0.5 = Elastic Net)\n")
+cat("Alpha (regularization mix):", best_params$alpha, "\n")
+cat("(0 = Ridge, 1 = Lasso, 0.5 = Elastic Net)\n")
 if(best_params$alpha == 1) {
-  cat("     → Using Lasso (L1 regularization only)\n")
+  cat("Using Lasso (L1 regularization only)\n")
 } else if(best_params$alpha == 0) {
-  cat("     → Using Ridge (L2 regularization only)\n")
+  cat("Using Ridge (L2 regularization only)\n")
 } else {
-  cat("     → Using Elastic Net (L1 + L2 regularization)\n")
-  cat("     → L1 ratio:", best_params$alpha, ", L2 ratio:", 1 - best_params$alpha, "\n")
+  cat("Using Elastic Net (L1 + L2 regularization)\n")
+  cat("L1 ratio:", best_params$alpha, ", L2 ratio:", 1 - best_params$alpha, "\n")
 }
-cat("   Lambda type:", best_params$lambda_type, "\n")
-cat("   Lambda value:", round(best_params$lambda_value, 6), "\n")
+cat("Lambda type:", best_params$lambda_type, "\n")
+cat("Lambda value:", round(best_params$lambda_value, 6), "\n")
 if(cv_model_final$lambda_to_use == "lambda.1se") {
-  cat("   Final lambda used: lambda.1se (more conservative)\n")
+  cat("Final lambda used: lambda.1se (more conservative)\n")
 } else {
-  cat("   Final lambda used: lambda.min (less conservative)\n")
+  cat("Final lambda used: lambda.min (less conservative)\n")
 }
 cat("\n============================================================================\n")
 cat("\n")
@@ -2418,11 +2418,11 @@ cat("\n")
 eval_result <- evaluate_model(cv_model_final, X_test_scaled, y_test, X_train_final, y_train,
                               scaler_center, scaler_scale, CLASSIFICATION_TYPE, class_labels)
 if(eval_result$train_auc - eval_result$auc_val > 0.15) {
-  cat("⚠️  WARNING: Large train–test AUC gap (", round(eval_result$train_auc - eval_result$auc_val, 3), 
+  cat("WARNING: Large train–test AUC gap (", round(eval_result$train_auc - eval_result$auc_val, 3), 
       "). Model may be overfitting; LOPO-CV AUC is a more reliable estimate of generalization.\n\n")
 }
 if(eval_result$auc_val >= 0.999) {
-  cat("⚠️  NOTE: Test AUC is (near) 1.0. With a small test set this can occur by chance; LOPO-CV AUC is the more reliable estimate.\n\n")
+  cat("NOTE: Test AUC is (near) 1.0. With a small test set this can occur by chance; LOPO-CV AUC is the more reliable estimate.\n\n")
 }
 
 # Step 11: LOPO-CV
