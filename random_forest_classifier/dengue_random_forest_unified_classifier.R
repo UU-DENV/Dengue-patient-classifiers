@@ -401,11 +401,11 @@ check_leakage_and_split <- function(df_wide, classification_type) {
     filter(n_classes > 1)
   
   if(nrow(class_check) > 0) {
-    cat("⚠️ WARNING: Some patients have inconsistent class labels!\n")
+    cat("WARNING: Some patients have inconsistent class labels!\n")
     print(class_check)
     cat("\n")
   } else {
-    cat("✓ All patients have consistent class labels\n\n")
+    cat("All patients have consistent class labels\n\n")
   }
   
   # Patient-level stratified train/test split
@@ -436,9 +436,9 @@ check_leakage_and_split <- function(df_wide, classification_type) {
     stop("ERROR: Patients found in both train and test sets!")
   }
   
-  cat("✓ Train/test split complete\n")
-  cat("  Training set:", length(train_patients), "patients,", nrow(train_data), "observations\n")
-  cat("  Test set:", length(test_patients), "patients,", nrow(test_data), "observations\n\n")
+  cat("Train/test split complete\n")
+  cat("Training set:", length(train_patients), "patients,", nrow(train_data), "observations\n")
+  cat("Test set:", length(test_patients), "patients,", nrow(test_data), "observations\n\n")
   
   return(list(
     train_data = train_data,
@@ -488,7 +488,7 @@ preprocess_data <- function(train_data, test_data, exclude_cols) {
     }
   }
   
-  cat("✓ Imputation complete\n\n")
+  cat("Imputation complete\n\n")
   
   return(list(
     X_train = X_train,
@@ -567,7 +567,7 @@ perform_feature_selection <- function(X_train, X_test, y_train, classification_t
     cat("After univariate AUC filtering:", ncol(X_train_final), "features\n")
   }
   
-  cat("✓ Final feature count:", ncol(X_train_final), "\n\n")
+  cat("Final feature count:", ncol(X_train_final), "\n\n")
   
   # Store fixed feature set for LOPO-CV
   fixed_feature_set <- colnames(X_train_final)
@@ -621,7 +621,7 @@ scale_features <- function(X_train, X_test) {
   X_train_scaled <- scale(X_train, center = scaler_center, scale = scaler_scale)
   X_test_scaled <- scale(X_test, center = scaler_center, scale = scaler_scale)
   
-  cat("✓ Features scaled\n\n")
+  cat("Features scaled\n\n")
   
   return(list(
     X_train_scaled = X_train_scaled,
@@ -749,11 +749,11 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
   best_idx <- which.max(cv_results$composite_score)
   best_params <- cv_results[best_idx, ]
   
-  cat("\n✓ Optimal parameters selected:\n")
-  cat("  Patient-grouped CV-AUC:", round(best_params$patient_cv_auc, 4), "\n")
-  cat("  Train-CV gap:", round(best_params$train_cv_gap, 4), "\n")
-  cat("  ntree:", best_params$ntree, ", mtry:", round(best_params$mtry, 2),
-      ", nodesize:", best_params$nodesize, ", maxnodes:", best_params$maxnodes, "\n\n")
+  cat("\nOptimal parameters selected:\n")
+  cat("Patient-grouped CV-AUC:", round(best_params$patient_cv_auc, 4), "\n")
+  cat("Train-CV gap:", round(best_params$train_cv_gap, 4), "\n")
+  cat("ntree:", best_params$ntree, ", mtry:", round(best_params$mtry, 2),
+      ",nodesize:", best_params$nodesize, ", maxnodes:", best_params$maxnodes, "\n\n")
   
   return(best_params)
 }
@@ -780,7 +780,7 @@ train_final_model <- function(X_train_scaled, y_train, best_params, class_weight
     classwt = if(!is.null(class_weights)) class_weights else NULL
   )
   
-  cat("✓ Final model trained\n\n")
+  cat("Final model trained\n\n")
   
   return(rf_model_final)
 }
@@ -849,7 +849,7 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
     test_patient <- unique_patients[i]
     
     if(i %% 5 == 0) {
-      cat("  Processed", i, "/", n_patients, "patients\n")
+      cat("Processed", i, "/", n_patients, "patients\n")
     }
     
     tryCatch({
@@ -960,7 +960,7 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
       
       # Validate predictions are in valid range [0, 1]
       if(any(is.na(pred_prob_fold)) || any(pred_prob_fold < 0) || any(pred_prob_fold > 1)) {
-        cat("    Warning: Invalid predictions for patient", test_patient, "- skipping\n")
+        cat("Warning: Invalid predictions for patient", test_patient, "- skipping\n")
         next
       }
       
@@ -970,7 +970,7 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
       lopo_fold_counter <- lopo_fold_counter + 1
       
     }, error = function(e) {
-      cat("    Error processing patient", test_patient, ":", e$message, "\n")
+      cat("Error processing patient", test_patient, ":", e$message, "\n")
     })
   }
   
@@ -1003,7 +1003,7 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
     
     # Validate predictions
     if(any(is.na(all_preds)) || any(all_preds < 0) || any(all_preds > 1)) {
-      cat("⚠️  WARNING: Invalid predictions detected. Removing invalid values.\n")
+      cat("WARNING: Invalid predictions detected. Removing invalid values.\n")
       valid_idx <- !is.na(all_preds) & all_preds >= 0 & all_preds <= 1
       all_preds <- all_preds[valid_idx]
       all_labels <- all_labels[valid_idx]
@@ -1020,7 +1020,7 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
         
         # Validate AUC is reasonable (should be >= 0.5 for a valid classifier)
         if(lopo_auc < 0.5) {
-          cat("⚠️  WARNING: LOPO-CV AUC < 0.5 (", round(lopo_auc, 4), 
+          cat("WARNING: LOPO-CV AUC < 0.5 (", round(lopo_auc, 4), 
               "). Trying reversed direction.\n")
           # Try reversed direction
           lopo_roc <- roc(all_labels, all_preds, quiet = TRUE,
@@ -1028,33 +1028,33 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
                          direction = ">")  # Lower predictions = positive class
           lopo_auc <- auc(lopo_roc)
           if(lopo_auc < 0.5) {
-            cat("⚠️  WARNING: LOPO-CV AUC still < 0.5 after reversal. Check predictions.\n")
+            cat("WARNING: LOPO-CV AUC still < 0.5 after reversal. Check predictions.\n")
           }
         }
         
-        cat("✓ LOPO-CV complete\n")
-        cat("  Successful folds:", lopo_fold_counter, "/", n_patients, "\n")
-        cat("  LOPO-CV AUC:", round(lopo_auc, 4), "\n")
-        cat("  Predictions range:", round(range(all_preds), 4), "\n")
-        cat("  Class distribution:", paste(table(all_labels), collapse = ", "), "\n\n")
+        cat("LOPO-CV complete\n")
+        cat("Successful folds:", lopo_fold_counter, "/", n_patients, "\n")
+        cat("LOPO-CV AUC:", round(lopo_auc, 4), "\n")
+        cat("Predictions range:", round(range(all_preds), 4), "\n")
+        cat("Class distribution:", paste(table(all_labels), collapse = ", "), "\n\n")
       }, error = function(e) {
-        cat("⚠️  ERROR computing LOPO-CV ROC:", e$message, "\n")
-        cat("  Predictions range:", range(all_preds, na.rm = TRUE), "\n")
-        cat("  Unique labels:", paste(unique(all_labels), collapse = ", "), "\n")
+        cat("ERROR computing LOPO-CV ROC:", e$message, "\n")
+        cat("Predictions range:", range(all_preds, na.rm = TRUE), "\n")
+        cat("Unique labels:", paste(unique(all_labels), collapse = ", "), "\n")
         lopo_roc <<- NULL
         lopo_auc <<- NA
       })
     } else {
       lopo_roc <- NULL
       lopo_auc <- NA
-      cat("⚠️ LOPO-CV failed: Insufficient class diversity\n")
-      cat("  Unique labels:", length(unique(all_labels)), "\n")
-      cat("  Total predictions:", length(all_preds), "\n\n")
+      cat("LOPO-CV failed: Insufficient class diversity\n")
+      cat("Unique labels:", length(unique(all_labels)), "\n")
+      cat("Total predictions:", length(all_preds), "\n\n")
     }
   } else {
     lopo_roc <- NULL
     lopo_auc <- NA
-    cat("⚠️ LOPO-CV failed: No successful predictions\n\n")
+    cat("LOPO-CV failed: No successful predictions\n\n")
   }
   
   return(list(
@@ -1162,7 +1162,7 @@ create_feature_importance_plot <- function(importance_df, classification_type, o
     ggsave(gsub("\\.png$", ".emf", base_filename), plot = p_feature_imp, width = 20, height = 16, units = "in"),
     error = function(e) message("EMF export skipped: ", conditionMessage(e))
   )
-  cat("✓ Feature importance plot saved\n\n")
+  cat("Feature importance plot saved\n\n")
 }
 
 create_plots <- function(roc_obj, auc_val, train_auc, lopo_roc, lopo_auc, 
@@ -1572,7 +1572,7 @@ create_plots <- function(roc_obj, auc_val, train_auc, lopo_roc, lopo_auc,
            plot = p_roc_combined_shaded, width = 19, height = 19, units = "in"),
     error = function(e) message("EMF export skipped: ", conditionMessage(e))
   )
-  cat("✓ All plots saved\n\n")
+  cat("All plots saved\n\n")
 }
 
 ### ============================================================================
