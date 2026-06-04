@@ -1,6 +1,6 @@
 ###UNIFIED DENGUE PATIENT CLASSIFIER - RANDOM FOREST
 
-###This unified classifier can perform multiple classification tasks:
+###Uses a random forest classifier based on plasma protein LFQ values to perform multiple classification tasks:
 ###1. AP vs RP (Acute Phase vs Recovery Phase)
 ###2. DF vs DHF (Dengue Fever vs Dengue Hemorrhagic Fever)
 ###3. Hospitalized vs Subclinical
