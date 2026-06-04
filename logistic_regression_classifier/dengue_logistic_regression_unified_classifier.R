@@ -87,7 +87,7 @@ if(!dir.exists("figures")) dir.create("figures")
 ### MODULE 1: DATA LOADING AND TRANSFORMATION
 
 load_and_transform_data <- function(input_file, classification_type) {
-  cat("=== MODULE 1: DATA LOADING AND TRANSFORMATION ===\n")
+  cat("MODULE 1: DATA LOADING AND TRANSFORMATION\n")
   cat("Classification type:", classification_type, "\n")
   cat("Input file:", input_file, "\n\n")
   
@@ -360,7 +360,7 @@ load_and_transform_data <- function(input_file, classification_type) {
 ### MODULE 2: DATA LEAKAGE CHECK AND TRAIN/TEST SPLIT
 
 check_leakage_and_split <- function(df_wide, classification_type) {
-  cat("=== MODULE 2: DATA LEAKAGE CHECK AND TRAIN/TEST SPLIT ===\n")
+  cat("MODULE 2: DATA LEAKAGE CHECK AND TRAIN/TEST SPLIT\n")
   
   # Determine which columns to exclude (patient_id, class, and optionally timepoint/Group)
   exclude_cols <- c("patient_id", "class")
@@ -438,7 +438,7 @@ check_leakage_and_split <- function(df_wide, classification_type) {
 ### MODULE 3: DATA PREPROCESSING AND IMPUTATION
 
 preprocess_data <- function(train_data, test_data, exclude_cols) {
-  cat("=== MODULE 3: DATA PREPROCESSING ===\n")
+  cat("MODULE 3: DATA PREPROCESSING\n")
   
   y_train <- factor(train_data$class)
   y_test <- factor(test_data$class)
@@ -486,7 +486,7 @@ preprocess_data <- function(train_data, test_data, exclude_cols) {
 ### MODULE 4: FEATURE SELECTION
 
 perform_feature_selection <- function(X_train, X_test, y_train, classification_type) {
-  cat("=== MODULE 4: FEATURE SELECTION ===\n")
+  cat("MODULE 4: FEATURE SELECTION\n")
   cat("Original number of features:", ncol(X_train), "\n")
   
   # Method 1: Variance-based filtering
@@ -647,7 +647,7 @@ perform_feature_selection <- function(X_train, X_test, y_train, classification_t
 ### MODULE 5: CLASS BALANCE HANDLING
 
 handle_class_balance <- function(y_train, balance_strength = 1.5) {
-  cat("=== MODULE 5: CLASS BALANCE HANDLING (REVISED) ===\n")
+  cat("MODULE 5: CLASS BALANCE HANDLING (REVISED)\n")
   
   class_counts <- table(y_train)
   cat("Class counts:\n")
@@ -680,7 +680,7 @@ handle_class_balance <- function(y_train, balance_strength = 1.5) {
 ### MODULE 6: FEATURE SCALING
 
 scale_features <- function(X_train, X_test) {
-  cat("=== MODULE 6: FEATURE SCALING ===\n")
+  cat("MODULE 6: FEATURE SCALING\n")
   
   scaler_center <- apply(X_train, 2, mean, na.rm = TRUE)
   scaler_scale <- apply(X_train, 2, sd, na.rm = TRUE)
@@ -689,7 +689,7 @@ scale_features <- function(X_train, X_test) {
   X_train_scaled <- scale(X_train, center = scaler_center, scale = scaler_scale)
   X_test_scaled <- scale(X_test, center = scaler_center, scale = scaler_scale)
   
-  cat("✓ Features scaled\n\n")
+  cat("Features scaled\n\n")
   
   return(list(
     X_train_scaled = X_train_scaled,
@@ -702,7 +702,7 @@ scale_features <- function(X_train, X_test) {
 ### MODULE 7: HYPERPARAMETER TUNING (REVISED)
 
 tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weights) {
-  cat("=== MODULE 7: HYPERPARAMETER TUNING (REVISED) ===\n")
+  cat("MODULE 7: HYPERPARAMETER TUNING (REVISED)\n")
   cat("Using patient-grouped CV for alpha/lambda tuning...\n\n")
   
   # Scale features for tuning
@@ -1256,7 +1256,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
     }
   }
   
-  cat("\n=== MODEL SELECTION ===\n")
+  cat("\nMODEL SELECTION\n")
   
   # Check if we have any results at all
   if(nrow(alpha_results) == 0) {
@@ -1364,7 +1364,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
 ### MODULE 8: MODEL TRAINING
 
 train_final_model <- function(X_train_scaled, y_train, best_params, class_weights) {
-  cat("=== MODULE 8: MODEL TRAINING (REVISED) ===\n")
+  cat("MODULE 8: MODEL TRAINING (REVISED)\n")
   
   # Validate best_params
   if(is.null(best_params)) {
@@ -1480,7 +1480,7 @@ train_final_model <- function(X_train_scaled, y_train, best_params, class_weight
 
 evaluate_model <- function(cv_model_final, X_test_scaled, y_test, X_train_final, y_train, 
                            scaler_center, scaler_scale, classification_type, class_labels) {
-  cat("=== MODULE 9: MODEL EVALUATION ===\n")
+  cat("MODULE 9: MODEL EVALUATION\n")
   
   # Test set predictions - use the lambda selected during tuning
   lambda_to_use <- if("lambda_to_use" %in% names(cv_model_final)) {
@@ -1535,7 +1535,7 @@ evaluate_model <- function(cv_model_final, X_test_scaled, y_test, X_train_final,
 ### MODULE 10: LEAVE-ONE-PATIENT-OUT CROSS-VALIDATION
                                       
 perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classification_type, class_weights_template, class_levels = NULL) {
-  cat("=== MODULE 10: LEAVE-ONE-PATIENT-OUT CROSS-VALIDATION ===\n")
+  cat("MODULE 10: LEAVE-ONE-PATIENT-OUT CROSS-VALIDATION\n")
   
   unique_patients <- unique(df_wide$patient_id)
   n_patients <- length(unique_patients)
@@ -1702,7 +1702,7 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
 ### MODULE 11: FEATURE IMPORTANCE
 
 extract_feature_importance <- function(cv_model_final, feature_names = NULL) {
-  cat("=== MODULE 11: FEATURE IMPORTANCE ===\n")
+  cat("MODULE 11: FEATURE IMPORTANCE\n")
   
   # Extract coefficients using lambda.min to get more features (less conservative than lambda.1se)
   # This allows us to show more features in the importance plot
@@ -1763,7 +1763,7 @@ extract_feature_importance <- function(cv_model_final, feature_names = NULL) {
 ### MODULE 12: PLOTTING
 
 create_feature_importance_plot <- function(importance_df, classification_type, output_prefix) {
-  cat("=== CREATING SEPARATE FEATURE IMPORTANCE PLOT ===\n")
+  cat("CREATING SEPARATE FEATURE IMPORTANCE PLOT\n")
   
   if(nrow(importance_df) == 0) {
     cat("No features to plot\n\n")
@@ -1861,7 +1861,7 @@ create_plots <- function(roc_obj, auc_val, train_auc, lopo_roc, lopo_auc,
                         classification_type, class_labels, output_prefix,
                         cv_model_final, X_train_final, y_train, scaler_center, scaler_scale,
                         n_train, n_test, n_lopo) {
-  cat("=== MODULE 12: CREATING PLOTS ===\n")
+  cat("MODULE 12: CREATING PLOTS\n")
   
   # Build ROC summary table (Method, N, AUROC) for annotation on ROC plots
   roc_table_df <- data.frame(
@@ -2266,9 +2266,9 @@ create_plots <- function(roc_obj, auc_val, train_auc, lopo_roc, lopo_auc,
 
 ###MAIN
 
-cat("============================================================================\n")
+cat("\n")
 cat("UNIFIED DENGUE PATIENT CLASSIFIER - LOGISTIC REGRESSION (ELASTIC NET)\n")
-cat("============================================================================\n\n")
+cat("\n\n")
 
 # Step 1: Load and transform data
 data_result <- load_and_transform_data(INPUT_FILE, CLASSIFICATION_TYPE)
@@ -2320,9 +2320,9 @@ cv_model_final <- train_final_model(X_train_scaled, y_train, best_params, class_
 
 # Step 9: Print diagnostic summary
 cat("\n")
-cat("============================================================================\n")
+cat("\n")
 cat("DIAGNOSTIC SUMMARY\n")
-cat("============================================================================\n")
+cat("\n")
 cat("\n1. FEATURE COUNT:\n")
 cat("Final number of features used:", ncol(X_train_final), "\n")
 cat("Sample-to-feature ratio:", round(nrow(X_train_scaled) / ncol(X_train_final), 2), ":1\n")
@@ -2372,7 +2372,7 @@ if(cv_model_final$lambda_to_use == "lambda.1se") {
 } else {
   cat("Final lambda used: lambda.min (less conservative)\n")
 }
-cat("\n============================================================================\n")
+cat("\n\n")
 cat("\n")
 
 # Step 10: Evaluate model
@@ -2407,9 +2407,9 @@ create_plots(eval_result$roc_obj, eval_result$auc_val, eval_result$train_auc,
 create_feature_importance_plot(importance_df, CLASSIFICATION_TYPE, OUTPUT_PREFIX)
 
 # Final summary
-cat("============================================================================\n")
+cat("\n")
 cat("FINAL SUMMARY\n")
-cat("============================================================================\n")
+cat("\n")
 cat("Classification:", CLASSIFICATION_TYPE, "\n")
 cat("Train AUC:", round(eval_result$train_auc, 4), "\n")
 cat("Test AUC:", round(eval_result$auc_val, 4), "\n")
