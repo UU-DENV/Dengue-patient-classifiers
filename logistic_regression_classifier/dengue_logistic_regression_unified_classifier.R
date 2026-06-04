@@ -1,6 +1,8 @@
 ### UNIFIED DENGUE PATIENT CLASSIFIER - LOGISTIC REGRESSION (ELASTIC NET)
 
-### This unified classifier can perform multiple classification tasks:
+###A complementary classifier to the original random forest classifier (combines logistic regression with elastic net regularization) to 
+###perform multiple classification tasks:
+
 ###1. AP vs RP (Acute Phase vs Recovery Phase)
 ###2. DF vs DHF (Dengue Fever vs Dengue Hemorrhagic Fever)
 ###3. Hospitalized vs Subclinical
