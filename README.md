@@ -1,9 +1,7 @@
 # Dengue-patient-classifiers
 This repository contains the codes used to analyze whether plasma peptide biomarkers can be used to classify dengue patients into various disease states and is linked to the medRXIV preprint
 
-```
-Shamorkina, T. M., Nteak, S. K., Lay, S., Kallor, A. A., Ly, S., Duong, V., ... & Snijder, J. (2026). Plasma proteomics identifies early markers of endothelial and inflammatory activation associated with dengue disease severity in children. Medrxiv.
-```
+Shamorkina, T. M., Nteak, S. K., Lay, S., Kallor, A. A., Ly, S., Duong,V., ... & Snijder, J. (2026). Plasma proteomics identifies early markers of endothelial and inflammatory activation associated with dengue disease severity in children. Medrxiv.
 
 The three classes of disease states are:
 ```
@@ -11,6 +9,7 @@ a) Acute vs Recovery
 b) Hospitalized vs Subclinical
 c) Dengue Fever (DF) vs Dengue Hemorrhagic Fever (DHF)
 ```
+Plasma peptide LFQ values per patient are normalized, batch-corrected then input to the classifiers, which learns a decision boundary between each class based on these LFQ values.
 
 There are two types of classifiers used:
 
