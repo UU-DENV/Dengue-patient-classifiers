@@ -1,25 +1,12 @@
-### ============================================================================
 ### UNIFIED DENGUE PATIENT CLASSIFIER - LOGISTIC REGRESSION (ELASTIC NET)
-### ============================================================================
+
 ### This unified classifier can perform multiple classification tasks:
-###   1. AP vs RP (Acute Phase vs Recovery Phase)
-###   2. DF vs DHF (Dengue Fever vs Dengue Hemorrhagic Fever)
-###   3. Hospitalized vs Subclinical
-###   4. DF vs DHF with 18-gene panel
-###   5. Hospitalized vs Subclinical with 21-gene panel
-###
-### KEY ANTI-OVERFITTING MEASURES:
-###   - NO UPSAMPLING: Uses class weights instead of upsampling
-###   - AGGRESSIVE FEATURE SELECTION: Moderate feature count with n_samples/3 rule
-###   - CONSERVATIVE HYPERPARAMETERS: Patient-grouped CV for hyperparameter tuning
-###   - CV ON ORIGINAL DATA: Hyperparameter tuning uses original (non-upsampled) data
-###   - FEATURE ENGINEERING: Creates biologically meaningful ratios and interactions
-###   - BATCH EFFECT VALIDATION: Checks for normalization issues and batch effects
-###
-### ============================================================================
-### USER CONFIGURATION SECTION
-### ============================================================================
-### MODIFY THESE SETTINGS TO SELECT THE CLASSIFICATION TASK
+###1. AP vs RP (Acute Phase vs Recovery Phase)
+###2. DF vs DHF (Dengue Fever vs Dengue Hemorrhagic Fever)
+###3. Hospitalized vs Subclinical
+###4. DF vs DHF with 18-gene panel
+###5. Hospitalized vs Subclinical with 21-gene panel
+
 
 # Classification type: "AP_RP", "DF_DHF", "HP_SUB", "DF_DHF_panel18", "HP_SUB_panel21"
 CLASSIFICATION_TYPE <- "HP_SUB_panel21"  #THE USER MUST SELECT ONE CLASSIFICATION TYPE FROM THE LIST ABOVE
@@ -35,10 +22,6 @@ OUTPUT_PREFIX <- "unified_LR_HP_SUB_panel21"  #TO BE MODIFIED AS PREFERRED
 
 # Random seed for train/test split (set to a number for reproducibility; NA = no seed, different split each run)
 RANDOM_SEED_SPLIT <- 123
-
-# ============================================================================
-# END USER CONFIGURATION
-# ============================================================================
 
 ### Load required packages
 if(!require(tidyverse)) install.packages("tidyverse")
@@ -98,9 +81,8 @@ tryCatch({
 ### Create output directory
 if(!dir.exists("figures")) dir.create("figures")
 
-### ============================================================================
+
 ### MODULE 1: DATA LOADING AND TRANSFORMATION
-### ============================================================================
 
 load_and_transform_data <- function(input_file, classification_type) {
   cat("=== MODULE 1: DATA LOADING AND TRANSFORMATION ===\n")
@@ -372,9 +354,8 @@ load_and_transform_data <- function(input_file, classification_type) {
   ))
 }
 
-### ============================================================================
+
 ### MODULE 2: DATA LEAKAGE CHECK AND TRAIN/TEST SPLIT
-### ============================================================================
 
 check_leakage_and_split <- function(df_wide, classification_type) {
   cat("=== MODULE 2: DATA LEAKAGE CHECK AND TRAIN/TEST SPLIT ===\n")
@@ -452,9 +433,7 @@ check_leakage_and_split <- function(df_wide, classification_type) {
   ))
 }
 
-### ============================================================================
 ### MODULE 3: DATA PREPROCESSING AND IMPUTATION
-### ============================================================================
 
 preprocess_data <- function(train_data, test_data, exclude_cols) {
   cat("=== MODULE 3: DATA PREPROCESSING ===\n")
@@ -502,9 +481,7 @@ preprocess_data <- function(train_data, test_data, exclude_cols) {
   ))
 }
 
-### ============================================================================
 ### MODULE 4: FEATURE SELECTION
-### ============================================================================
 
 perform_feature_selection <- function(X_train, X_test, y_train, classification_type) {
   cat("=== MODULE 4: FEATURE SELECTION ===\n")
@@ -665,9 +642,7 @@ perform_feature_selection <- function(X_train, X_test, y_train, classification_t
   ))
 }
 
-### ============================================================================
 ### MODULE 5: CLASS BALANCE HANDLING
-### ============================================================================
 
 handle_class_balance <- function(y_train, balance_strength = 1.5) {
   cat("=== MODULE 5: CLASS BALANCE HANDLING (REVISED) ===\n")
@@ -700,9 +675,7 @@ handle_class_balance <- function(y_train, balance_strength = 1.5) {
   return(class_weights)
 }
 
-### ============================================================================
 ### MODULE 6: FEATURE SCALING
-### ============================================================================
 
 scale_features <- function(X_train, X_test) {
   cat("=== MODULE 6: FEATURE SCALING ===\n")
@@ -724,9 +697,7 @@ scale_features <- function(X_train, X_test) {
   ))
 }
 
-### ============================================================================
 ### MODULE 7: HYPERPARAMETER TUNING (REVISED)
-### ============================================================================
 
 tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weights) {
   cat("=== MODULE 7: HYPERPARAMETER TUNING (REVISED) ===\n")
@@ -1388,9 +1359,7 @@ tune_hyperparameters <- function(X_train_final, y_train, train_data, class_weigh
   return(best_params)
 }
 
-### ============================================================================
 ### MODULE 8: MODEL TRAINING
-### ============================================================================
 
 train_final_model <- function(X_train_scaled, y_train, best_params, class_weights) {
   cat("=== MODULE 8: MODEL TRAINING (REVISED) ===\n")
@@ -1505,9 +1474,7 @@ train_final_model <- function(X_train_scaled, y_train, best_params, class_weight
   return(cv_model_final)
 }
 
-### ============================================================================
 ### MODULE 9: MODEL EVALUATION
-### ============================================================================
 
 evaluate_model <- function(cv_model_final, X_test_scaled, y_test, X_train_final, y_train, 
                            scaler_center, scaler_scale, classification_type, class_labels) {
@@ -1563,10 +1530,8 @@ evaluate_model <- function(cv_model_final, X_test_scaled, y_test, X_train_final,
   ))
 }
 
-### ============================================================================
 ### MODULE 10: LEAVE-ONE-PATIENT-OUT CROSS-VALIDATION
-### ============================================================================
-
+                                      
 perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classification_type, class_weights_template, class_levels = NULL) {
   cat("=== MODULE 10: LEAVE-ONE-PATIENT-OUT CROSS-VALIDATION ===\n")
   
@@ -1732,9 +1697,7 @@ perform_lopo_cv <- function(df_wide, fixed_feature_set, best_params, classificat
   ))
 }
 
-### ============================================================================
 ### MODULE 11: FEATURE IMPORTANCE
-### ============================================================================
 
 extract_feature_importance <- function(cv_model_final, feature_names = NULL) {
   cat("=== MODULE 11: FEATURE IMPORTANCE ===\n")
@@ -1795,9 +1758,7 @@ extract_feature_importance <- function(cv_model_final, feature_names = NULL) {
   return(importance_df)
 }
 
-### ============================================================================
 ### MODULE 12: PLOTTING
-### ============================================================================
 
 create_feature_importance_plot <- function(importance_df, classification_type, output_prefix) {
   cat("=== CREATING SEPARATE FEATURE IMPORTANCE PLOT ===\n")
@@ -2301,9 +2262,7 @@ create_plots <- function(roc_obj, auc_val, train_auc, lopo_roc, lopo_auc,
   cat("✓ All plots saved\n\n")
 }
 
-### ============================================================================
-### MAIN EXECUTION
-### ============================================================================
+###MAIN
 
 cat("============================================================================\n")
 cat("UNIFIED DENGUE PATIENT CLASSIFIER - LOGISTIC REGRESSION (ELASTIC NET)\n")
