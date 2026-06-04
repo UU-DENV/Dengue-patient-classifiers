@@ -1,5 +1,5 @@
 # Dengue-patient-classifiers
-This repository contains the codes used to analyze whether plasma peptide biomarkers can be used to classify dengue patients into various disease states and is linked to the medRXIV preprint
+This repository contains the codes used to analyze whether plasma peptide quantities can be used to classify dengue patients into various disease states and is linked to the medRXIV preprint
 
 Shamorkina, T. M., Nteak, S. K., Lay, S., Kallor, A. A., Ly, S., Duong,V., ... & Snijder, J. (2026). Plasma proteomics identifies early markers of endothelial and inflammatory activation associated with dengue disease severity in children. Medrxiv.
 
